@@ -1,0 +1,177 @@
+title: Hydroponics
+views:
+  - title: Hydroponics
+    path: hydroponics
+    icon: mdi:sprout
+    badges: []
+    cards:
+      - type: entities
+        title: Controller
+        show_header_toggle: false
+        entities:
+          - entity: sensor.hydroponics_controller_node_hydroponics_ph_level
+            name: pH
+            icon: mdi:ph
+          - entity: sensor.hydroponics_controller_node_hydroponics_electrical_conductivity
+            name: Electrical conductivity
+            icon: mdi:water-percent
+
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.hydroponics_controller_node_hydroponics_ph_level
+            name: pH
+            min: 4
+            max: 8
+            needle: true
+            severity:
+              green: 5.8
+              yellow: 5.5
+              red: 0
+          - type: gauge
+            entity: sensor.hydroponics_controller_node_hydroponics_electrical_conductivity
+            name: EC
+            min: 0
+            max: 3000
+            needle: true
+            severity:
+              green: 800
+              yellow: 300
+              red: 0
+
+      - type: history-graph
+        title: Last 24 Hours
+        hours_to_show: 24
+        entities:
+          - entity: sensor.hydroponics_controller_node_hydroponics_ph_level
+            name: pH
+          - entity: sensor.hydroponics_controller_node_hydroponics_electrical_conductivity
+            name: EC
+
+      - type: entities
+        title: Targets
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.hydro_auto_control_enabled
+            name: Auto control
+          - entity: input_number.hydro_ph_target
+            name: pH target
+          - entity: input_number.hydro_ph_deadband
+            name: pH deadband
+          - entity: input_number.hydro_ec_target
+            name: EC target
+          - entity: input_number.hydro_ec_deadband
+            name: EC deadband
+
+      - type: entities
+        title: Timed Dosing
+        show_header_toggle: false
+        entities:
+          - entity: input_number.hydro_ph_dose_ml
+            name: pH dose volume
+          - entity: input_number.hydro_nutrient_dose_ml
+            name: Nutrient dose volume
+          - entity: script.hydro_dose_ph_up_5s
+            name: Dose pH Up
+            icon: mdi:arrow-up-bold
+          - entity: script.hydro_dose_ph_down_5s
+            name: Dose pH Down
+            icon: mdi:arrow-down-bold
+          - entity: script.hydro_dose_floragro_5s
+            name: Dose FloraGro
+            icon: mdi:bottle-tonic-plus
+          - entity: script.hydro_dose_floramicro_5s
+            name: Dose FloraMicro
+            icon: mdi:bottle-tonic-plus-outline
+          - entity: script.hydro_dose_florabloom_5s
+            name: Dose FloraBloom
+            icon: mdi:flower
+          - entity: script.hydro_dose_equal_nutrients
+            name: Dose equal nutrients
+            icon: mdi:bottle-tonic-plus
+          - entity: script.hydro_stop_all_pumps
+            name: Stop all pumps
+            icon: mdi:stop-circle
+
+      - type: entities
+        title: Probe Calibration
+        show_header_toggle: false
+        entities:
+          - entity: sensor.workshop_hydroponics_controller_node_hydroponics_ph_calibration_status
+            name: pH calibration
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_get_ph_calibration
+            name: Get pH calibration
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ph_7
+            name: Calibrate pH 7
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ph_4
+            name: Calibrate pH 4
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ph_10
+            name: Calibrate pH 10
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_clear_ph_calibration
+            name: Clear pH calibration
+          - entity: sensor.workshop_hydroponics_controller_node_hydroponics_ec_calibration_status
+            name: EC calibration
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_get_ec_calibration
+            name: Get EC calibration
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ec_dry
+            name: Calibrate EC dry
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ec_1413
+            name: Calibrate EC 1413
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_calibrate_ec_12880
+            name: Calibrate EC 12880
+          - entity: button.workshop_hydroponics_controller_node_hydroponics_clear_ec_calibration
+            name: Clear EC calibration
+
+      - type: entities
+        title: Pump Calibration
+        show_header_toggle: false
+        entities:
+          - entity: input_number.hydro_calibration_run_seconds
+            name: Run duration
+          - entity: script.hydro_calibrate_run_pump_1
+            name: Run Pump 1
+          - entity: input_number.hydro_pump_1_calibration_ml
+            name: Pump 1 measured mL
+          - entity: input_number.hydro_pump_1_ml_per_sec
+            name: Pump 1 mL/s
+          - entity: script.hydro_calibrate_run_pump_2
+            name: Run Pump 2
+          - entity: input_number.hydro_pump_2_calibration_ml
+            name: Pump 2 measured mL
+          - entity: input_number.hydro_pump_2_ml_per_sec
+            name: Pump 2 mL/s
+          - entity: script.hydro_calibrate_run_pump_3
+            name: Run Pump 3
+          - entity: input_number.hydro_pump_3_calibration_ml
+            name: Pump 3 measured mL
+          - entity: input_number.hydro_pump_3_ml_per_sec
+            name: Pump 3 mL/s
+          - entity: script.hydro_calibrate_run_pump_4
+            name: Run Pump 4
+          - entity: input_number.hydro_pump_4_calibration_ml
+            name: Pump 4 measured mL
+          - entity: input_number.hydro_pump_4_ml_per_sec
+            name: Pump 4 mL/s
+          - entity: script.hydro_calibrate_run_pump_5
+            name: Run Pump 5
+          - entity: input_number.hydro_pump_5_calibration_ml
+            name: Pump 5 measured mL
+          - entity: input_number.hydro_pump_5_ml_per_sec
+            name: Pump 5 mL/s
+          - entity: script.hydro_save_pump_flow_calibration
+            name: Save flow calibration
+
+      - type: entities
+        title: Manual Pump State
+        show_header_toggle: false
+        entities:
+          - entity: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+            name: Pump 1 - pH Up
+          - entity: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+            name: Pump 2 - pH Down
+          - entity: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+            name: Pump 3 - FloraGro
+          - entity: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+            name: Pump 4 - FloraMicro
+          - entity: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+            name: Pump 5 - FloraBloom

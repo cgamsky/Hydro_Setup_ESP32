@@ -1,0 +1,496 @@
+input_number:
+  hydro_ph_target:
+    name: Hydro pH Target
+    initial: 6.0
+    min: 5.0
+    max: 7.0
+    step: 0.05
+    icon: mdi:ph
+
+  hydro_ph_deadband:
+    name: Hydro pH Deadband
+    initial: 0.1
+    min: 0.05
+    max: 0.5
+    step: 0.05
+    icon: mdi:approximately-equal
+
+  hydro_ec_target:
+    name: Hydro EC Target
+    initial: 1200
+    min: 500
+    max: 2500
+    step: 50
+    unit_of_measurement: "uS/cm"
+    icon: mdi:water-percent
+
+  hydro_ec_deadband:
+    name: Hydro EC Deadband
+    initial: 100
+    min: 25
+    max: 500
+    step: 25
+    unit_of_measurement: "uS/cm"
+    icon: mdi:approximately-equal
+
+  hydro_ph_dose_seconds:
+    name: Hydro pH Dose Duration
+    initial: 3
+    min: 1
+    max: 10
+    step: 1
+    unit_of_measurement: s
+    icon: mdi:timer-outline
+
+  hydro_nutrient_dose_seconds:
+    name: Hydro Nutrient Dose Duration
+    initial: 5
+    min: 1
+    max: 20
+    step: 1
+    unit_of_measurement: s
+    icon: mdi:timer-outline
+
+  hydro_calibration_run_seconds:
+    name: Hydro Pump Calibration Run
+    initial: 60
+    min: 10
+    max: 180
+    step: 5
+    unit_of_measurement: s
+    icon: mdi:timer-cog-outline
+
+  hydro_ph_dose_ml:
+    name: Hydro pH Dose Volume
+    initial: 2
+    min: 0.5
+    max: 20
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:cup-water
+
+  hydro_nutrient_dose_ml:
+    name: Hydro Nutrient Dose Volume
+    initial: 5
+    min: 0.5
+    max: 50
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:cup-water
+
+  hydro_pump_1_ml_per_sec:
+    name: Hydro Pump 1 Flow
+    initial: 1
+    min: 0.1
+    max: 10
+    step: 0.01
+    unit_of_measurement: "mL/s"
+    icon: mdi:speedometer
+
+  hydro_pump_2_ml_per_sec:
+    name: Hydro Pump 2 Flow
+    initial: 1
+    min: 0.1
+    max: 10
+    step: 0.01
+    unit_of_measurement: "mL/s"
+    icon: mdi:speedometer
+
+  hydro_pump_3_ml_per_sec:
+    name: Hydro Pump 3 Flow
+    initial: 1
+    min: 0.1
+    max: 10
+    step: 0.01
+    unit_of_measurement: "mL/s"
+    icon: mdi:speedometer
+
+  hydro_pump_4_ml_per_sec:
+    name: Hydro Pump 4 Flow
+    initial: 1
+    min: 0.1
+    max: 10
+    step: 0.01
+    unit_of_measurement: "mL/s"
+    icon: mdi:speedometer
+
+  hydro_pump_5_ml_per_sec:
+    name: Hydro Pump 5 Flow
+    initial: 1
+    min: 0.1
+    max: 10
+    step: 0.01
+    unit_of_measurement: "mL/s"
+    icon: mdi:speedometer
+
+  hydro_pump_1_calibration_ml:
+    name: Hydro Pump 1 Calibration Volume
+    initial: 60
+    min: 0
+    max: 500
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:beaker-outline
+
+  hydro_pump_2_calibration_ml:
+    name: Hydro Pump 2 Calibration Volume
+    initial: 60
+    min: 0
+    max: 500
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:beaker-outline
+
+  hydro_pump_3_calibration_ml:
+    name: Hydro Pump 3 Calibration Volume
+    initial: 60
+    min: 0
+    max: 500
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:beaker-outline
+
+  hydro_pump_4_calibration_ml:
+    name: Hydro Pump 4 Calibration Volume
+    initial: 60
+    min: 0
+    max: 500
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:beaker-outline
+
+  hydro_pump_5_calibration_ml:
+    name: Hydro Pump 5 Calibration Volume
+    initial: 60
+    min: 0
+    max: 500
+    step: 0.5
+    unit_of_measurement: mL
+    icon: mdi:beaker-outline
+
+input_boolean:
+  hydro_auto_control_enabled:
+    name: Hydro Auto Control
+    icon: mdi:auto-mode
+
+script:
+  hydro_dose_ph_up_5s:
+    alias: Hydro - Dose pH Up
+    mode: single
+    icon: mdi:arrow-up-bold
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+      - delay:
+          seconds: >-
+            {% set ml = states('input_number.hydro_ph_dose_ml') | float(2) %}
+            {% set rate = states('input_number.hydro_pump_1_ml_per_sec') | float(1) %}
+            {{ [1, (ml / rate) | round(0, 'ceil') | int] | max }}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+
+  hydro_dose_ph_down_5s:
+    alias: Hydro - Dose pH Down
+    mode: single
+    icon: mdi:arrow-down-bold
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+      - delay:
+          seconds: >-
+            {% set ml = states('input_number.hydro_ph_dose_ml') | float(2) %}
+            {% set rate = states('input_number.hydro_pump_2_ml_per_sec') | float(1) %}
+            {{ [1, (ml / rate) | round(0, 'ceil') | int] | max }}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+
+  hydro_dose_floragro_5s:
+    alias: Hydro - Dose FloraGro
+    mode: single
+    icon: mdi:bottle-tonic-plus
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+      - delay:
+          seconds: >-
+            {% set ml = states('input_number.hydro_nutrient_dose_ml') | float(5) %}
+            {% set rate = states('input_number.hydro_pump_3_ml_per_sec') | float(1) %}
+            {{ [1, (ml / rate) | round(0, 'ceil') | int] | max }}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+
+  hydro_dose_floramicro_5s:
+    alias: Hydro - Dose FloraMicro
+    mode: single
+    icon: mdi:bottle-tonic-plus-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+      - delay:
+          seconds: >-
+            {% set ml = states('input_number.hydro_nutrient_dose_ml') | float(5) %}
+            {% set rate = states('input_number.hydro_pump_4_ml_per_sec') | float(1) %}
+            {{ [1, (ml / rate) | round(0, 'ceil') | int] | max }}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+
+  hydro_dose_florabloom_5s:
+    alias: Hydro - Dose FloraBloom
+    mode: single
+    icon: mdi:flower
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+      - delay:
+          seconds: >-
+            {% set ml = states('input_number.hydro_nutrient_dose_ml') | float(5) %}
+            {% set rate = states('input_number.hydro_pump_5_ml_per_sec') | float(1) %}
+            {{ [1, (ml / rate) | round(0, 'ceil') | int] | max }}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+
+  hydro_dose_equal_nutrients:
+    alias: Hydro - Dose Equal Nutrients
+    mode: single
+    icon: mdi:bottle-tonic-plus
+    sequence:
+      - service: script.hydro_dose_floragro_5s
+      - service: script.hydro_dose_floramicro_5s
+      - service: script.hydro_dose_florabloom_5s
+
+  hydro_calibrate_run_pump_1:
+    alias: Hydro - Calibration Run Pump 1
+    mode: single
+    icon: mdi:timer-play-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+      - delay:
+          seconds: "{{ states('input_number.hydro_calibration_run_seconds') | int(60) }}"
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+
+  hydro_calibrate_run_pump_2:
+    alias: Hydro - Calibration Run Pump 2
+    mode: single
+    icon: mdi:timer-play-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+      - delay:
+          seconds: "{{ states('input_number.hydro_calibration_run_seconds') | int(60) }}"
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+
+  hydro_calibrate_run_pump_3:
+    alias: Hydro - Calibration Run Pump 3
+    mode: single
+    icon: mdi:timer-play-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+      - delay:
+          seconds: "{{ states('input_number.hydro_calibration_run_seconds') | int(60) }}"
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+
+  hydro_calibrate_run_pump_4:
+    alias: Hydro - Calibration Run Pump 4
+    mode: single
+    icon: mdi:timer-play-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+      - delay:
+          seconds: "{{ states('input_number.hydro_calibration_run_seconds') | int(60) }}"
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+
+  hydro_calibrate_run_pump_5:
+    alias: Hydro - Calibration Run Pump 5
+    mode: single
+    icon: mdi:timer-play-outline
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+      - delay:
+          seconds: "{{ states('input_number.hydro_calibration_run_seconds') | int(60) }}"
+      - service: switch.turn_off
+        target:
+          entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+
+  hydro_save_pump_flow_calibration:
+    alias: Hydro - Save Pump Flow Calibration
+    mode: single
+    icon: mdi:content-save-cog-outline
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.hydro_pump_1_ml_per_sec
+        data:
+          value: >-
+            {{ [0.1, (states('input_number.hydro_pump_1_calibration_ml') | float(0) / states('input_number.hydro_calibration_run_seconds') | float(60)) | round(3)] | max }}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.hydro_pump_2_ml_per_sec
+        data:
+          value: >-
+            {{ [0.1, (states('input_number.hydro_pump_2_calibration_ml') | float(0) / states('input_number.hydro_calibration_run_seconds') | float(60)) | round(3)] | max }}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.hydro_pump_3_ml_per_sec
+        data:
+          value: >-
+            {{ [0.1, (states('input_number.hydro_pump_3_calibration_ml') | float(0) / states('input_number.hydro_calibration_run_seconds') | float(60)) | round(3)] | max }}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.hydro_pump_4_ml_per_sec
+        data:
+          value: >-
+            {{ [0.1, (states('input_number.hydro_pump_4_calibration_ml') | float(0) / states('input_number.hydro_calibration_run_seconds') | float(60)) | round(3)] | max }}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.hydro_pump_5_ml_per_sec
+        data:
+          value: >-
+            {{ [0.1, (states('input_number.hydro_pump_5_calibration_ml') | float(0) / states('input_number.hydro_calibration_run_seconds') | float(60)) | round(3)] | max }}
+
+  hydro_stop_all_pumps:
+    alias: Hydro - Stop All Pumps
+    mode: single
+    icon: mdi:stop-circle
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+            - switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+            - switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+            - switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+            - switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+            - switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+
+automation:
+  - alias: Hydro - Daily Email Summary
+    id: hydro_daily_email_summary
+    mode: single
+    trigger:
+      - platform: time
+        at: "08:00:00"
+    action:
+      - service: notify.hydro_email
+        data:
+          title: "Hydroponics Daily Summary"
+          message: >-
+            Hydroponics Daily Summary
+
+            pH: {{ states('sensor.hydroponics_controller_node_hydroponics_ph_level') }}
+            pH target: {{ states('input_number.hydro_ph_target') }}
+            pH deadband: {{ states('input_number.hydro_ph_deadband') }}
+
+            EC: {{ states('sensor.hydroponics_controller_node_hydroponics_electrical_conductivity') }} uS/cm
+            EC target: {{ states('input_number.hydro_ec_target') }} uS/cm
+            EC deadband: {{ states('input_number.hydro_ec_deadband') }} uS/cm
+
+            Auto control: {{ states('input_boolean.hydro_auto_control_enabled') }}
+
+            Pump flow calibration:
+            - Pump 1 pH Up: {{ states('input_number.hydro_pump_1_ml_per_sec') }} mL/s
+            - Pump 2 pH Down: {{ states('input_number.hydro_pump_2_ml_per_sec') }} mL/s
+            - Pump 3 FloraGro: {{ states('input_number.hydro_pump_3_ml_per_sec') }} mL/s
+            - Pump 4 FloraMicro: {{ states('input_number.hydro_pump_4_ml_per_sec') }} mL/s
+            - Pump 5 FloraBloom: {{ states('input_number.hydro_pump_5_ml_per_sec') }} mL/s
+
+            Pump states:
+            - pH Up: {{ states('switch.hydroponics_controller_node_peristaltic_pump_1_ph_up') }}
+            - pH Down: {{ states('switch.hydroponics_controller_node_peristaltic_pump_2_ph_down') }}
+            - FloraGro: {{ states('switch.hydroponics_controller_node_peristaltic_pump_3_floragro') }}
+            - FloraMicro: {{ states('switch.hydroponics_controller_node_peristaltic_pump_4_floramicro') }}
+            - FloraBloom: {{ states('switch.hydroponics_controller_node_peristaltic_pump_5_florabloom') }}
+
+  - alias: Hydro - Conservative pH and EC Control
+    id: hydro_conservative_ph_ec_control
+    mode: single
+    trigger:
+      - platform: time_pattern
+        minutes: "/5"
+    condition:
+      - condition: state
+        entity_id: input_boolean.hydro_auto_control_enabled
+        state: "on"
+      - condition: state
+        entity_id:
+          - switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+          - switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+          - switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+          - switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+          - switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+        state: "off"
+    variables:
+      ph_state: "{{ states('sensor.hydroponics_controller_node_hydroponics_ph_level') }}"
+      ec_state: "{{ states('sensor.hydroponics_controller_node_hydroponics_electrical_conductivity') }}"
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set ph = ph_state | float(none) %}
+                  {% set target = states('input_number.hydro_ph_target') | float(6.0) %}
+                  {% set deadband = states('input_number.hydro_ph_deadband') | float(0.1) %}
+                  {{ ph != none and ph > target + deadband }}
+            sequence:
+              - service: script.hydro_dose_ph_down_5s
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set ph = ph_state | float(none) %}
+                  {% set target = states('input_number.hydro_ph_target') | float(6.0) %}
+                  {% set deadband = states('input_number.hydro_ph_deadband') | float(0.1) %}
+                  {{ ph != none and ph < target - deadband }}
+            sequence:
+              - service: script.hydro_dose_ph_up_5s
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set ec = ec_state | float(none) %}
+                  {% set target = states('input_number.hydro_ec_target') | float(1200) %}
+                  {% set deadband = states('input_number.hydro_ec_deadband') | float(100) %}
+                  {{ ec != none and ec < target - deadband }}
+            sequence:
+              - service: script.hydro_dose_equal_nutrients
+
+  - alias: Hydro - Pump Runtime Failsafe
+    id: hydro_pump_runtime_failsafe
+    mode: parallel
+    trigger:
+      - platform: state
+        entity_id:
+          - switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+          - switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+          - switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+          - switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+          - switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+        to: "on"
+        for: "00:01:00"
+    action:
+      - service: switch.turn_off
+        data:
+          entity_id: "{{ trigger.entity_id }}"

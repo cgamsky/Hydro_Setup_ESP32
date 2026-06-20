@@ -1,0 +1,64 @@
+hydro_dose_ph_up_5s:
+  alias: Hydro - Dose pH Up 5s
+  mode: single
+  icon: mdi:arrow-up-bold
+  sequence:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+    - delay: "00:00:05"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_1_ph_up
+
+hydro_dose_ph_down_5s:
+  alias: Hydro - Dose pH Down 5s
+  mode: single
+  icon: mdi:arrow-down-bold
+  sequence:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+    - delay: "00:00:05"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_2_ph_down
+
+hydro_dose_floragro_5s:
+  alias: Hydro - Dose FloraGro 5s
+  mode: single
+  icon: mdi:bottle-tonic-plus
+  sequence:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+    - delay: "00:00:05"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_3_floragro
+
+hydro_dose_floramicro_5s:
+  alias: Hydro - Dose FloraMicro 5s
+  mode: single
+  icon: mdi:bottle-tonic-plus-outline
+  sequence:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+    - delay: "00:00:05"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_4_floramicro
+
+hydro_dose_florabloom_5s:
+  alias: Hydro - Dose FloraBloom 5s
+  mode: single
+  icon: mdi:flower
+  sequence:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
+    - delay: "00:00:05"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.hydroponics_controller_node_peristaltic_pump_5_florabloom

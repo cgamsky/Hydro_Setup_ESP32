@@ -1,0 +1,195 @@
+esphome:
+  name: hydro-controller
+  friendly_name: Hydroponics Controller Node
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  # Forces the chip onto the exact same network lane as your server
+  manual_ip:
+    static_ip: 192.168.50.150   # Locks the chip to .150 on your main pool
+    gateway: 192.168.50.1       # Your main home router IP
+    subnet: 255.255.255.0
+    dns1: 192.168.50.1          # Fills in the missing DNS to stabilize the network stack
+  ap:
+    ssid: "Hydro-Controller-Fallback"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# Activates a direct control page accessible from any browser
+web_server:
+  version: 2
+
+logger:
+
+# Removed native API to force MQTT communication due to mDNS/routing blocks
+
+mqtt:
+  broker: 192.168.50.86  # Your Home Assistant LXC IP running the Mosquitto Broker
+  # username: "mqtt_user"
+  # password: "mqtt_password"
+
+ota:
+  - platform: esphome
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+sensor:
+  - platform: ezo
+    id: ph_probe
+    name: "Hydroponics pH Level"
+    address: 99
+    unit_of_measurement: "pH"
+    accuracy_decimals: 2
+    update_interval: 15s
+    on_calibration:
+      then:
+        - text_sensor.template.publish:
+            id: ph_calibration_status
+            state: !lambda 'return x;'
+
+  - platform: ezo
+    id: ec_probe
+    name: "Hydroponics Electrical Conductivity"
+    address: 100
+    unit_of_measurement: "µS/cm"
+    accuracy_decimals: 0
+    update_interval: 15s
+    on_calibration:
+      then:
+        - text_sensor.template.publish:
+            id: ec_calibration_status
+            state: !lambda 'return x;'
+
+text_sensor:
+  - platform: template
+    id: ph_calibration_status
+    name: "Hydroponics pH Calibration Status"
+    icon: mdi:ph
+
+  - platform: template
+    id: ec_calibration_status
+    name: "Hydroponics EC Calibration Status"
+    icon: mdi:water-percent
+
+button:
+  - platform: template
+    name: "Hydroponics Calibrate pH 4"
+    icon: mdi:ph
+    on_press:
+      then:
+        - lambda: |-
+            id(ph_probe).set_calibration_point_low(4.00);
+
+  - platform: template
+    name: "Hydroponics Calibrate pH 7"
+    icon: mdi:ph
+    on_press:
+      then:
+        - lambda: |-
+            id(ph_probe).set_calibration_point_mid(7.00);
+
+  - platform: template
+    name: "Hydroponics Calibrate pH 10"
+    icon: mdi:ph
+    on_press:
+      then:
+        - lambda: |-
+            id(ph_probe).set_calibration_point_high(10.00);
+
+  - platform: template
+    name: "Hydroponics Get pH Calibration"
+    icon: mdi:information-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(ph_probe).get_calibration();
+
+  - platform: template
+    name: "Hydroponics Clear pH Calibration"
+    icon: mdi:delete-alert-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(ph_probe).clear_calibration();
+
+  - platform: template
+    name: "Hydroponics Calibrate EC Dry"
+    icon: mdi:water-off-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(ec_probe).send_custom("Cal,dry");
+
+  - platform: template
+    name: "Hydroponics Calibrate EC 1413"
+    icon: mdi:water-percent
+    on_press:
+      then:
+        - lambda: |-
+            id(ec_probe).set_calibration_generic(1413.0);
+
+  - platform: template
+    name: "Hydroponics Calibrate EC 12880"
+    icon: mdi:water-percent
+    on_press:
+      then:
+        - lambda: |-
+            id(ec_probe).set_calibration_generic(12880.0);
+
+  - platform: template
+    name: "Hydroponics Get EC Calibration"
+    icon: mdi:information-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(ec_probe).get_calibration();
+
+  - platform: template
+    name: "Hydroponics Clear EC Calibration"
+    icon: mdi:delete-alert-outline
+    on_press:
+      then:
+        - lambda: |-
+            id(ec_probe).clear_calibration();
+
+switch:
+  - platform: gpio
+    pin: GPIO12
+    id: pump_1
+    name: "Peristaltic Pump 1 (pH Up)"
+    inverted: false
+
+  - platform: gpio
+    pin: GPIO14
+    id: pump_2
+    name: "Peristaltic Pump 2 (pH Down)"
+    inverted: false
+
+  - platform: gpio
+    pin: GPIO27
+    id: pump_3
+    name: "Peristaltic Pump 3 (FloraGro)"
+    inverted: false
+
+  - platform: gpio
+    pin: GPIO26
+    id: pump_4
+    name: "Peristaltic Pump 4 (FloraMicro)"
+    inverted: false
+
+  - platform: gpio
+    pin: GPIO25
+    id: pump_5
+    name: "Peristaltic Pump 5 (FloraBloom)"
+    inverted: false
