@@ -36,6 +36,62 @@ Current local deployment:
 
 Adjust these values before using the project on another network.
 
+## Proxmox Server
+
+The controller stack runs on a Dell OptiPlex 3060 Proxmox host (`pve`,
+`192.168.50.10`). Guests:
+
+- VM `100` - OMV-NAS (OpenMediaVault), serves NFS at `192.168.50.228`
+- CT `101` - dev-agent, mounts NFS shares at `/workspace` and `/llm`
+- CT `102` - homeassistant, IP `192.168.50.86`
+
+### Safe shutdown (e.g. before moving the machine)
+
+Shut guests down first, then the host. On the Proxmox host:
+
+```bash
+pct shutdown 102          # homeassistant
+pct shutdown 101          # dev-agent
+qm shutdown 100           # OMV-NAS (ignore the "QEMU Guest Agent" warning)
+# wait until all report stopped, then:
+shutdown -h now
+```
+
+Guest start/stop order is configured so this also happens automatically on
+reboot: VM `100` starts first with a 90s grace period for NFS, then CT `101`,
+then CT `102`. Shutdown reverses the order.
+
+### NFS storage and automounts
+
+The host mounts four NFS shares from the OMV NAS (`192.168.50.228`). These use
+systemd automounts (`x-systemd.automount` in `/etc/fstab`) so they mount
+on-demand and self-heal even if the NAS boots after the host:
+
+- `/mnt/omv-dev` (bound into CT 101 as `/workspace`)
+- `/mnt/omv-llm` (bound into CT 101 as `/llm`)
+- `/mnt/omv-docker`
+- `/mnt/omv-timemachine`
+
+If a share ever looks empty after a power event, trigger it by accessing it
+(`ls /mnt/omv-dev`) and, if a container shows the local disk instead of the
+share, restart it (`pct stop 101 && sleep 3 && pct start 101`).
+
+### UPS
+
+The host is on an APC BE425M UPS for outage ride-through and surge protection.
+Note: this model has no data USB port, so Proxmox cannot auto-shutdown on a
+prolonged outage. Shut down manually if an outage may outlast the battery.
+
+### Inventory
+
+Regenerate a full read-only host inventory at any time:
+
+```bash
+ssh root@192.168.50.10 'bash -s' < tools/proxmox-inventory.sh > proxmox-inventory.txt
+```
+
+`proxmox-inventory.txt` is git-ignored.
+
 ## Home Assistant
 
 Install the Home Assistant package at:
@@ -56,5 +112,6 @@ The automation is intentionally conservative. It uses short dosing pulses,
 deadbands, and a 60-second pump failsafe instead of continuous PID-style output.
 Keep auto-control disabled until probes and pump flow rates have been calibrated.
 
-Do not commit Home Assistant `secrets.yaml`, ESPHome secrets, app passwords, or
-local inventory files.
+Do not commit Home Assistant `secrets.yaml`, ESPHome secrets, app passwords,
+SSH keys (`key`, `vskey`, `*.pem`), or local inventory files. These are all
+covered by `.gitignore`.

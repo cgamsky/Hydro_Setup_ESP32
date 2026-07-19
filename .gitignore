@@ -8,3 +8,12 @@
 /proxmox-backup-check.txt
 /Promox_server_details.pdf
 *.log
+
+# SSH keys - never commit private or public keys
+/key
+/key.pub
+/vskey
+/vskey.pub
+*.pem
+id_rsa
+id_ed25519

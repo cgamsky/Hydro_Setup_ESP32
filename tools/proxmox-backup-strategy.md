@@ -48,7 +48,11 @@ Default mirrored paths are:
 - `/mnt/omv-dev` -> `/mnt/proxmox-backups/omv-data-mirror/dev`
 - `/mnt/omv-llm` -> `/mnt/proxmox-backups/omv-data-mirror/llm`
 
-Time Machine and Docker should be added after they are separately exported from OMV and mounted on Proxmox.
+Time Machine and Docker are now separately exported from OMV and mounted on
+Proxmox as `/mnt/omv-timemachine` and `/mnt/omv-docker`. All four NFS shares use
+systemd automounts (`x-systemd.automount` in `/etc/fstab`) so they mount
+on-demand and survive the NAS booting after the host. Add the two new paths to
+the mirror once you want them included in the external backup.
 
 ## Stage 3: Verify Next Proxmox Backup
 
