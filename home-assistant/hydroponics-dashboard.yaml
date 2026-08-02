@@ -15,6 +15,15 @@ views:
           - entity: sensor.hydroponics_controller_node_hydroponics_electrical_conductivity
             name: Electrical conductivity
             icon: mdi:water-percent
+          - entity: sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate
+            name: Flow rate
+            icon: mdi:waves-arrow-right
+          - entity: sensor.workshop_hydroponics_controller_node_hydroponics_total_volume
+            name: Total volume
+            icon: mdi:counter
+          - entity: input_boolean.hydro_flow_alert_active
+            name: Low-flow alert
+            icon: mdi:water-alert
 
       - type: horizontal-stack
         cards:
@@ -47,6 +56,8 @@ views:
             name: pH
           - entity: sensor.hydroponics_controller_node_hydroponics_electrical_conductivity
             name: EC
+          - entity: sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate
+            name: Flow
 
       - type: entities
         title: Targets

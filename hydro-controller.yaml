@@ -71,6 +71,42 @@ sensor:
             id: ec_calibration_status
             state: !lambda 'return x;'
 
+  # --- Main-loop flow meter (G1/2 Hall-effect sensor, 1-30 L/min) ---
+  # Red -> ESP32 3V3, black -> GND, yellow -> GPIO33. The matching sensor is
+  # rated for a 3-24V supply and specifies f(Hz) = 7.5 * flow(L/min), or 450
+  # pulses/L. If your sensor label requires 5V, power it from 5V and put a
+  # 5V-to-3.3V logic level shifter on yellow; ESP32 GPIOs are not 5V tolerant.
+  - platform: pulse_counter
+    pin:
+      number: GPIO33
+      mode:
+        input: true
+        pullup: true
+    id: flow_pulses
+    name: "Hydroponics Flow Rate"
+    unit_of_measurement: "L/min"
+    device_class: volume_flow_rate
+    state_class: measurement
+    accuracy_decimals: 2
+    icon: mdi:water-pump
+    update_interval: 5s
+    # Convert pulses/min -> L/min. For a YF-S201 the datasheet factor is ~7.5,
+    # meaning frequency(Hz) = 7.5 * flow(L/min). pulse_counter reports in
+    # pulses-per-minute, so divide by 60 to get Hz, then by the factor.
+    filters:
+      - lambda: return (x / 60.0) / 7.5;
+    # Running total of litres dispensed
+    total:
+      name: "Hydroponics Total Volume"
+      unit_of_measurement: "L"
+      device_class: water
+      state_class: total_increasing
+      accuracy_decimals: 2
+      icon: mdi:cup-water
+      # Each pulse = 1/(7.5*60) litres. Convert accumulated pulse count -> litres.
+      filters:
+        - lambda: return x / (7.5 * 60.0);
+
 text_sensor:
   - platform: template
     id: ph_calibration_status

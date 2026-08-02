@@ -16,6 +16,8 @@ In Home Assistant, verify that MQTT discovery has created these entities:
 
 - `sensor.hydroponics_controller_node_hydroponics_ph_level`
 - `sensor.hydroponics_controller_node_hydroponics_electrical_conductivity`
+- `sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate`
+- `sensor.workshop_hydroponics_controller_node_hydroponics_total_volume`
 - `switch.hydroponics_controller_node_peristaltic_pump_1_ph_up`
 - `switch.hydroponics_controller_node_peristaltic_pump_2_ph_down`
 - `switch.hydroponics_controller_node_peristaltic_pump_3_floragro`
@@ -23,6 +25,46 @@ In Home Assistant, verify that MQTT discovery has created these entities:
 - `switch.hydroponics_controller_node_peristaltic_pump_5_florabloom`
 
 If Home Assistant generated slightly different entity IDs, update both YAML files to match.
+
+## Main-loop Flow Meter
+
+The configured G1/2 Hall sensor uses GPIO33 and the manufacturer's nominal
+calibration of 450 pulses per litre (`frequency Hz = 7.5 * flow L/min`). Wire it
+with the ESP32 powered off:
+
+- Sensor red -> ESP32 `3V3`
+- Sensor black -> ESP32 `GND`
+- Sensor yellow -> ESP32 `GPIO33`
+
+The matching sensor is specified for a 3-24 V supply, so powering it from 3.3 V
+keeps its pulse output safe for the ESP32. If the label or datasheet supplied
+with your particular unit says its minimum supply is 5 V, do not connect its
+yellow wire directly to the ESP32. Power red from 5 V and pass yellow through a
+5 V-to-3.3 V logic level shifter before GPIO33. All grounds must be common.
+
+Install the meter in the arrow direction, upstream of a filter where practical,
+and avoid an elbow immediately at its inlet. After flashing, MQTT discovery
+will add flow-rate and total-volume sensor entities to Home Assistant; no new HA
+integration is required.
+
+The Home Assistant package also sends an email through `notify.hydro_email` if
+flow remains below 4.0 L/min for 60 seconds. It latches
+`input_boolean.hydro_flow_alert_active` so only one warning is sent per event.
+After flow remains above 4.0 L/min for 30 seconds, the latch clears and a single
+recovery email is sent. The threshold uses the sensor's factory calibration and
+is intended to detect a major drop from the observed normal flow of about
+7.3 L/min.
+
+To calibrate, pass a measured volume through the installed plumbing and compare
+it with `Hydroponics Total Volume`. Replace both occurrences of `7.5` in
+`hydro-controller.yaml` with:
+
+```text
+new factor = 7.5 * ESPHome reported volume / actual measured volume
+```
+
+Use a test flow close to normal operating flow. The sensor is rated only for
+1-30 L/min, so readings below 1 L/min are not guaranteed.
 
 The current calibration entities discovered after the ESPHome OTA update are:
 

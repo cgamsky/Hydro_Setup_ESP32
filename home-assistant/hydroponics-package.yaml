@@ -173,6 +173,10 @@ input_boolean:
     name: Hydro Auto Control
     icon: mdi:auto-mode
 
+  hydro_flow_alert_active:
+    name: Hydro Flow Alert Active
+    icon: mdi:water-alert
+
 script:
   hydro_dose_ph_up_5s:
     alias: Hydro - Dose pH Up
@@ -389,6 +393,56 @@ script:
             - switch.hydroponics_controller_node_peristaltic_pump_5_florabloom
 
 automation:
+  - alias: Hydro - Low Flow Email Alert
+    id: hydro_low_flow_email_alert
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate
+        below: 4.0
+        for: "00:01:00"
+    condition:
+      - condition: state
+        entity_id: input_boolean.hydro_flow_alert_active
+        state: "off"
+    action:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.hydro_flow_alert_active
+      - service: notify.hydro_email
+        data:
+          title: "Hydroponics Warning: Low Flow"
+          message: >-
+            Hydroponics circulation flow has remained below 4.0 L/min for at
+            least 60 seconds. Current flow is
+            {{ states('sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate') }} L/min.
+            Check the circulation pump, filter, tubing, valves, reservoir level,
+            and flow-meter direction for a blockage or pump failure.
+
+  - alias: Hydro - Flow Recovery Email
+    id: hydro_flow_recovery_email
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate
+        above: 4.0
+        for: "00:00:30"
+    condition:
+      - condition: state
+        entity_id: input_boolean.hydro_flow_alert_active
+        state: "on"
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.hydro_flow_alert_active
+      - service: notify.hydro_email
+        data:
+          title: "Hydroponics Flow Restored"
+          message: >-
+            Hydroponics circulation flow has remained above 4.0 L/min for at
+            least 30 seconds. Current flow is
+            {{ states('sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate') }} L/min.
+
   - alias: Hydro - Daily Email Summary
     id: hydro_daily_email_summary
     mode: single
@@ -411,6 +465,8 @@ automation:
             EC deadband: {{ states('input_number.hydro_ec_deadband') }} uS/cm
 
             Auto control: {{ states('input_boolean.hydro_auto_control_enabled') }}
+            Flow: {{ states('sensor.workshop_hydroponics_controller_node_hydroponics_flow_rate') }} L/min
+            Flow alert: {{ states('input_boolean.hydro_flow_alert_active') }}
 
             Pump flow calibration:
             - Pump 1 pH Up: {{ states('input_number.hydro_pump_1_ml_per_sec') }} mL/s
